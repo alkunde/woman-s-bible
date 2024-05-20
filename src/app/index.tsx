@@ -28,6 +28,7 @@ const adId = Platform.select({
 });
 
 const STORAGE = "@womans-bible-gracetech:bible";
+const SIZE_STORAGE = "@womans-bible-gracetech:font-size";
 
 export default function Home() {
   const insets = useSafeAreaInsets();
@@ -103,11 +104,19 @@ export default function Home() {
     }
   }
 
-  function increaseFontSize() {
-    setFontSize(fontSize + 1);
+  async function increaseFontSize() {
+    if (fontSize == 26) return;
+    const newFontSize = fontSize + 1;
+
+    await AsyncStorage.setItem(SIZE_STORAGE, newFontSize.toString());
+    setFontSize(newFontSize);
   }
 
-  function decreaseFontSize() {
+  async function decreaseFontSize() {
+    if (fontSize == 10) return;
+    const newFontSize = fontSize - 1;
+
+    await AsyncStorage.setItem(SIZE_STORAGE, newFontSize.toString());
     setFontSize(fontSize - 1);
   }
 
@@ -184,7 +193,6 @@ export default function Home() {
     setLoading(true);
 
     const book = await restoreLocalData();
-    console.log(book);
 
     const bookData: Selector[] = [];
     data.data.map(item => {
@@ -196,6 +204,11 @@ export default function Home() {
     setBookSelector(bookData);
 
     if (book) {
+      const versionSelect = versionSelector.filter(item => item.value === book.version);
+      if (versionSelect) {
+        setSelectedVersion(versionSelect[0]);
+      }
+
       const selected = bookData.filter(item => item.value === book.book);
       if (selected) {
         setSelectedBook(selected[0]);
@@ -207,7 +220,15 @@ export default function Home() {
     await getVerses();
   }
 
+  async function restoreFontSize() {
+    const data = await AsyncStorage.getItem(SIZE_STORAGE);
+    if (data) {
+      setFontSize(parseInt(data));
+    }
+  }
+
   useEffect(() => {
+    restoreFontSize();
     loadingScreen();
   }, []);
 
@@ -258,9 +279,10 @@ export default function Home() {
         <View style={{ flexDirection: "row", gap: 16, paddingHorizontal: 16, marginVertical: 8 }}>
           <Dropdown
             style={{ flex: 4, borderColor: "#FF699B", borderWidth: 1, borderRadius: 6, paddingVertical: 6 }}
-            selectedTextStyle={{ paddingLeft: 8, color: "#FF699B" }}
+            selectedTextStyle={{ paddingLeft: 8, color: "#FF699B", fontSize: fontSize }}
             itemTextStyle={{
               color: "#FF699B",
+              fontSize: fontSize,
             }}
             itemContainerStyle={{
               backgroundColor: "#FCEBFE"
@@ -274,9 +296,10 @@ export default function Home() {
 
           <Dropdown
             style={{ flex: 1, borderColor: "#FF699B", borderWidth: 1, borderRadius: 6, paddingVertical: 6 }}
-            selectedTextStyle={{ paddingLeft: 8, color: "#FF699B" }}
+            selectedTextStyle={{ paddingLeft: 8, color: "#FF699B", fontSize: fontSize }}
             itemTextStyle={{
               color: "#FF699B",
+              fontSize: fontSize,
             }}
             itemContainerStyle={{
               backgroundColor: "#FCEBFE"
