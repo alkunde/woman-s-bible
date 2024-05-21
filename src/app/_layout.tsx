@@ -3,36 +3,37 @@ import { useEffect, useState } from "react";
 import { Platform } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
 import { Slot } from "expo-router";
+import { AdEventType, AppOpenAd, TestIds } from "react-native-google-mobile-ads";
 import { requestTrackingPermissionsAsync } from "expo-tracking-transparency";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
-// SplashScreen.preventAutoHideAsync();
+SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const [onComplete, setOnComplete] = useState(true);
+  const [onComplete, setOnComplete] = useState(false);
 
   const appOpenId = Platform.select({
-    android: "",
-    ios: "",
+    android: "ca-app-pub-3200984351467142/2808430816",
+    ios: "ca-app-pub-3200984351467142/5432339124",
     default: "",
   });
 
-  // const appOpenAd = AppOpenAd.createForAdRequest(
-  //   __DEV___ ? TestIds.APP_OPEN : appOpenId,
-  //   { requestNonPersonalizedAdsOnly: true }
-  // );
+  const appOpenAd = AppOpenAd.createForAdRequest(
+    __DEV__ ? TestIds.APP_OPEN : appOpenId,
+    { requestNonPersonalizedAdsOnly: true }
+  );
 
-  // appOpenAd.addAdEventListener(AdEventType.LOADED, () => {
-  //   appOpenAd.show();
-  // });
+  appOpenAd.addAdEventListener(AdEventType.LOADED, () => {
+    appOpenAd.show();
+  });
 
-  // appOpenAd.addAdEventListener(AdEventType.CLOSED, () => {
-  //   setOnComplete(true);
-  // });
+  appOpenAd.addAdEventListener(AdEventType.CLOSED, () => {
+    setOnComplete(true);
+  });
 
-  // appOpenAd.addAdEventListener(AdEventType.ERROR, () => {
-  //   setOnComplete(true);
-  // });
+  appOpenAd.addAdEventListener(AdEventType.ERROR, () => {
+    setOnComplete(true);
+  });
 
   useEffect(() => {
     async function prepare() {
@@ -50,7 +51,7 @@ export default function RootLayout() {
     async function prepare() {
       await SplashScreen.preventAutoHideAsync();
 
-      // appOpenAd.load();
+      appOpenAd.load();
     }
 
     prepare();

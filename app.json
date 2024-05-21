@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "womans-bible",
+    "name": "Bíblia para elas",
     "slug": "womans-bible",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -12,27 +12,60 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "br.com.gracetech.womansbible",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSUserTrackingUsageDescription": "This identifier will be used to deliver personalized ads to you."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      }
-    },
-    "web": {
-      "bundler": "metro",
-      "output": "static",
-      "favicon": "./assets/images/favicon.png"
+        "backgroundColor": "#FF699B"
+      },
+      "permissions": [
+        "com.google.android.gms.permission.AD_ID"
+      ],
+      "package": "br.com.gracetech.womansbible"
     },
     "plugins": [
       "expo-router",
-      "expo-build-properties",
-      "expo-tracking-transparency"
+      "expo-font",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "useFrameworks": "static"
+          }
+        }
+      ],
+      [
+        "expo-tracking-transparency",
+        {
+          "userTrackingPermission": "This identifier will be used to deliver personalized ads to you."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "961a5445-d25b-4a1a-ad34-a572ed7cff95"
+      }
+    },
+    "react-native-google-mobile-ads": {
+      "android_app_id": "ca-app-pub-3200984351467142~5561666791",
+      "ios_app_id": "ca-app-pub-3200984351467142~2392076969",
+      "user_tracking_usage_description": "This identifier will be used to deliver personalized ads to you."
     }
   }
 }

@@ -4,6 +4,7 @@ import { FontAwesome, MaterialIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Dropdown } from "react-native-element-dropdown";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { BannerAd, BannerAdSize, TestIds } from "react-native-google-mobile-ads";
 import axios from "axios";
 
 import { Icon } from "@/components/icon";
@@ -22,8 +23,8 @@ type Selector = {
 }
 
 const adId = Platform.select({
-  android: "",
-  ios: "",
+  android: "ca-app-pub-3200984351467142/4121512481",
+  ios: "ca-app-pub-3200984351467142/9321868275",
   default: "",
 });
 
@@ -35,7 +36,6 @@ export default function Home() {
 
   const [loading, setLoading] = useState(true);
   const [verses, setVerses] = useState<Verses[]>([]);
-  // const [versionSelector, setVersionSelector] = useState<Selector[]>([]);
   const [selectedVersion, setSelectedVersion] = useState<Selector | null>(null);
   const [bookSelector, setBookSelector] = useState<Selector[]>([]);
   const [selectedBook, setSelectedBook] = useState<Selector | null>(null);
@@ -59,7 +59,6 @@ export default function Home() {
   ]
 
   async function getData(version: string, book: string, verse: string) {
-    console.log(version);
     setLoading(true);
     try {
       const response = await axios.get(`https://www.abibliadigital.com.br/api/verses/${version}/${book}/${verse}`, {
@@ -378,7 +377,13 @@ export default function Home() {
           </TouchableOpacity>
         </View>
 
-        <View style={{ height: 50, backgroundColor: "#4588aa" }} />
+        <BannerAd
+          unitId={__DEV__ ? TestIds.ADAPTIVE_BANNER : adId}
+          size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+          requestOptions={{
+            requestNonPersonalizedAdsOnly: true
+          }}
+        />
       </View>
     </>
   );
