@@ -4,7 +4,7 @@ import { FontAwesome, MaterialIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Dropdown } from "react-native-element-dropdown";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { BannerAd, BannerAdSize, TestIds } from "react-native-google-mobile-ads";
+import { BannerAd, BannerAdSize, TestIds} from "react-native-google-mobile-ads";
 import axios from "axios";
 
 import { Icon } from "@/components/icon";
@@ -28,39 +28,75 @@ const adId = Platform.select({
   default: "",
 });
 
-const STORAGE = "@womans-bible-gracetech:bible";
+const VERSION_STORAGE = "@womans-bible-gracetech:version";
+const BOOK_STORAGE = "@womans-bible-gracetech:book";
+const VERSE_STORAGE = "@womans-bible-gracetech:verse";
 const SIZE_STORAGE = "@womans-bible-gracetech:font-size";
 
 export default function Home() {
   const insets = useSafeAreaInsets();
 
-  const [loading, setLoading] = useState(true);
-  const [verses, setVerses] = useState<Verses[]>([]);
-  const [selectedVersion, setSelectedVersion] = useState<Selector | null>(null);
-  const [bookSelector, setBookSelector] = useState<Selector[]>([]);
-  const [selectedBook, setSelectedBook] = useState<Selector | null>(null);
-  const [verseSelector, setVerseSelector] = useState<Selector[]>([]);
-  const [selectedVerse, setSelectedVerse] = useState<Selector | null>(null);
-  const [fontSize, setFontSize] = useState(14);
-
   const versionSelector: Selector[] = [
-    {
-      label: "NVI",
-      value: "nvi",
-    },
-    {
-      label: "ACF",
-      value: "acf",
-    },
-    {
-      label: "RA",
-      value: "ra",
-    }
+    { label: "NVI", value: "nvi" },
+    { label: "ACF", value: "acf" },
+    { label: "RA", value: "ra" },
   ]
 
-  async function getData(version: string, book: string, verse: string) {
+  const [loading, setLoading] = useState(false);
+  const [verses, setVerses] = useState<Verses[]>([]);
+  const [versionSelected, setVersionSelected] = useState<Selector>();
+  const [bookSelector, setBookSelector] = useState<Selector[]>([]);
+  const [bookSelected, setBookSelected] = useState<Selector>();
+  const [verseSelector, setVerseSelector] = useState<Selector[]>([]);
+  const [verseSelected, setVerseSelected] = useState<Selector>();
+  const [fontSize, setFontSize] = useState(14);
+
+  async function increaseFontSize() {
+    if (fontSize === 26) return;
+    const newFontSize = fontSize + 1;
+
+    await AsyncStorage.setItem(SIZE_STORAGE, newFontSize.toString());
+    setFontSize(newFontSize);
+  }
+
+  async function decreaseFontSize() {
+    if (fontSize === 10) return;
+    const newFontSize = fontSize - 1;
+
+    await AsyncStorage.setItem(SIZE_STORAGE, newFontSize.toString());
+    setFontSize(newFontSize);
+  }
+
+  function handlePrevVerse() {
+    if (!verseSelected) return;
+
+    if (verseSelected.value === "1") return;
+
+    const verse = parseInt(verseSelected.value);
+    setVerseSelected(verseSelector[verse - 2]);
+  }
+
+  function handleNextVerse() {
+    if (!verseSelected) return;
+
+    const verse = parseInt(verseSelected.value);
+    if (verseSelector[verse] !== undefined) {
+      setVerseSelected(verseSelector[verse]);
+    }
+  }
+
+  async function getData() {
+    if (!versionSelected || !bookSelected || !verseSelected) return;
+
     setLoading(true);
     try {
+      const version = versionSelected.value;
+      const book = bookSelected.value;
+      const verse = verseSelected.value;
+
+      await AsyncStorage.setItem(BOOK_STORAGE, book);
+      await AsyncStorage.setItem(VERSE_STORAGE, verse);
+
       const response = await axios.get(`https://www.abibliadigital.com.br/api/verses/${version}/${book}/${verse}`, {
         headers: {
           "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdHIiOiJUaHUgTWF5IDAyIDIwMjQgMTc6NTY6MDUgR01UKzAwMDAubW9iaWxldGticmF6aWxAZ21haWwuY29tIiwiaWF0IjoxNzE0NjcyNTY1fQ.Y1WzktJsATf_UehI0WNE1nM55drvb_5LOZvBwXLmvZY"
@@ -75,8 +111,6 @@ export default function Home() {
           }
         });
         setVerses(items);
-      } else {
-        console.warn("internet error");
       }
     } catch(error) {
       console.warn(error);
@@ -85,150 +119,90 @@ export default function Home() {
     }
   }
 
-  function handlePrevVerse() {
-    if (selectedVerse === null) return;
-
-    if (selectedVerse.value === "1") return;
-
-    const verse = parseInt(selectedVerse.value);
-    setSelectedVerse(verseSelector[verse - 2]);
-  }
-
-  function handleNextVerse() {
-    if (selectedVerse === null) return;
-
-    const verse = parseInt(selectedVerse.value);
-    if (verseSelector[verse] !== undefined) {
-      setSelectedVerse(verseSelector[verse]);
-    }
-  }
-
-  async function increaseFontSize() {
-    if (fontSize == 26) return;
-    const newFontSize = fontSize + 1;
-
-    await AsyncStorage.setItem(SIZE_STORAGE, newFontSize.toString());
-    setFontSize(newFontSize);
-  }
-
-  async function decreaseFontSize() {
-    if (fontSize == 10) return;
-    const newFontSize = fontSize - 1;
-
-    await AsyncStorage.setItem(SIZE_STORAGE, newFontSize.toString());
-    setFontSize(fontSize - 1);
-  }
-
-  async function getVerses() {
-    if (selectedBook === null) return;
-
-    const verse = await restoreLocalData();
-
-    const bookFiltered = data.data.filter(item => item.title === selectedBook.label);
-    if (bookFiltered.length > 0) {
-      const verses: Selector[] = [];
-      for (let i = 1; i <= bookFiltered[0].chapters; i++) {
-        verses.push({
-          value: i.toString(),
-          label: i.toString(),
-        });
-      }
-      setVerseSelector(verses);
-
-      if (verse) {
-        if (verse.book === selectedBook.value) {
-          const filtered = verses.filter(item => item.value === verse.verse);
-          if (filtered) {
-            setSelectedVerse(filtered[0]);
-          }
-        } else {
-          setSelectedVerse(verses[0]);
-        }
-      } else {
-        setSelectedVerse(verses[0]);
-      }
-    }
-  }
-
-  async function saveCurrentRead() {
-    if (selectedVersion === null || selectedBook === null || selectedVerse === null) return;
-
-    getData(selectedVersion.value, selectedBook.value, selectedVerse.value);
-
-    await AsyncStorage.setItem(
-      STORAGE,
-      JSON.stringify({
-        version: selectedVersion.value,
-        book: selectedBook.value,
-        verse: selectedVerse.value,
-      })
-    );
-  }
-
-  useEffect(() => {
-    saveCurrentRead();
-  }, [selectedVerse]);
-
-  useEffect(() => {
-    getVerses();
-  }, [selectedBook]);
-
-  useEffect(() => {
-    if (selectedVersion === null || selectedBook === null || selectedVerse === null) return;
-
-    getData(selectedVersion.value, selectedBook.value, selectedVerse.value);
-  }, [selectedVersion]);
-
-  async function restoreLocalData() {
-    const data = await AsyncStorage.getItem(STORAGE);
-    if (data) {
-      return JSON.parse(data);
+  async function restoreVersion() {
+    const versionData = await AsyncStorage.getItem(VERSION_STORAGE);
+    if (versionData) {
+      const filtered = versionSelector.filter(item => item.value === versionData);
+      setVersionSelected(filtered[0]);
     } else {
-      return null;
+      setVersionSelected(versionSelector[0]);
     }
-  }
 
-  async function loadingScreen() {
-    setLoading(true);
-
-    const book = await restoreLocalData();
-
-    const bookData: Selector[] = [];
+    const books: Selector[] = [];
     data.data.map(item => {
-      bookData.push({
+      books.push({
         value: item.abbrev,
         label: item.title,
       });
     });
-    setBookSelector(bookData);
+    setBookSelector(books);
 
-    if (book) {
-      const versionSelect = versionSelector.filter(item => item.value === book.version);
-      if (versionSelect) {
-        setSelectedVersion(versionSelect[0]);
-      }
-
-      const selected = bookData.filter(item => item.value === book.book);
+    const bookData = await AsyncStorage.getItem(BOOK_STORAGE);
+    if (bookData) {
+      const selected = books.filter(item => item.value === bookData);
       if (selected) {
-        setSelectedBook(selected[0]);
+        setBookSelected(selected[0]);
       }
     } else {
-      setSelectedBook(bookData[0]);
-    }
-
-    await getVerses();
-  }
-
-  async function restoreFontSize() {
-    const data = await AsyncStorage.getItem(SIZE_STORAGE);
-    if (data) {
-      setFontSize(parseInt(data));
+      setBookSelected(books[0]);
     }
   }
 
   useEffect(() => {
-    restoreFontSize();
-    loadingScreen();
+    getData();
+  }, [verseSelected]);
+
+  useEffect(() => {
+    async function prepare() {
+      if (!bookSelected) return;
+
+      const bookFiltered = data.data.filter(item => item.title === bookSelected.label);
+      if (bookFiltered.length > 0) {
+        const verseList: Selector[] = [];
+        for(let i = 1; i <= bookFiltered[0].chapters; i++) {
+          verseList.push({
+            value: i.toString(),
+            label: i.toString(),
+          });
+        }
+        setVerseSelector(verseList);
+
+        const verseData = await AsyncStorage.getItem(VERSE_STORAGE);
+        if (verseData) {
+          if (verseData === bookSelected.value) {
+            const filtered = verseList.filter(item => item.value === verseData);
+            if (filtered) {
+              setVerseSelected(filtered[0]);
+            }
+          } else {
+            setVerseSelected(verseList[0]);
+          }
+        } else {
+          setVerseSelected(verseList[0]);
+        }
+      }
+    }
+
+    prepare();
+  }, [bookSelected]);
+
+  useEffect(() => {
+    async function prepare() {
+      if (versionSelected) {
+        await AsyncStorage.setItem(VERSION_STORAGE, versionSelected.value);
+      }
+      await getData();
+    }
+
+    prepare();
+  }, [versionSelected]);
+
+  useEffect(() => {
+    async function prepare() {
+      await restoreVersion();
+    }
+
+    prepare();
   }, []);
 
   return (
@@ -248,27 +222,32 @@ export default function Home() {
               borderRadius: 6,
               marginRight: 8,
             }}
-            selectedTextStyle={{ fontSize: fontSize, paddingLeft: 8, color: "#FF699B" }}
+            selectedTextStyle={{
+              fontSize: fontSize,
+              paddingLeft: 8,
+              color: "#FF699B",
+            }}
             itemTextStyle={{
-              fontSize: fontSize
+              fontSize: fontSize,
+              color: "#FF699B",
             }}
             itemContainerStyle={{
-              backgroundColor: "#FCEBFE"
+              backgroundColor: "#FCEBFE",
             }}
             data={versionSelector}
             labelField="label"
             valueField="value"
-            value={selectedVersion}
-            onChange={item => setSelectedVersion(item)}
+            value={versionSelected}
+            onChange={item => setVersionSelected(item)}
           />
 
-          <View style={{ width: 1, height: "50%", backgroundColor: "#AAAAAA", marginVertical: 16 }} />
+          <View style={{ width: 1, height: "50%", backgroundColor: "#AAAAAA" }} />
 
           <Icon onPress={increaseFontSize}>
             <MaterialIcons name="text-increase" color="#FF699B" size={20} />
           </Icon>
 
-          <View style={{ width: 1, height: "50%", backgroundColor: "#AAAAAA", marginVertical: 16 }} />
+          <View style={{ width: 1, height: "50%", backgroundColor: "#AAAAAA" }} />
 
           <Icon onPress={decreaseFontSize}>
             <MaterialIcons name="text-decrease" color="#FF699B" size={20} />
@@ -277,37 +256,57 @@ export default function Home() {
 
         <View style={{ flexDirection: "row", gap: 16, paddingHorizontal: 16, marginVertical: 8 }}>
           <Dropdown
-            style={{ flex: 4, borderColor: "#FF699B", borderWidth: 1, borderRadius: 6, paddingVertical: 6 }}
-            selectedTextStyle={{ paddingLeft: 8, color: "#FF699B", fontSize: fontSize }}
-            itemTextStyle={{
-              color: "#FF699B",
+            style={{
+              flex: 4,
+              borderColor: "#FF699B",
+              borderWidth: 1,
+              borderRadius: 6,
+              paddingVertical: 6,
+            }}
+            selectedTextStyle={{
               fontSize: fontSize,
+              paddingLeft: 8,
+              color: "#FF699B",
+            }}
+            itemTextStyle={{
+              fontSize: fontSize,
+              color: "#FF699B",
             }}
             itemContainerStyle={{
-              backgroundColor: "#FCEBFE"
+              backgroundColor: "#FCEBFE",
             }}
             data={bookSelector}
             labelField="label"
             valueField="value"
-            value={selectedBook}
-            onChange={item => setSelectedBook(item)}
+            value={bookSelected}
+            onChange={item => setBookSelected(item)}
           />
 
           <Dropdown
-            style={{ flex: 1, borderColor: "#FF699B", borderWidth: 1, borderRadius: 6, paddingVertical: 6 }}
-            selectedTextStyle={{ paddingLeft: 8, color: "#FF699B", fontSize: fontSize }}
-            itemTextStyle={{
-              color: "#FF699B",
+            style={{
+              flex: 1,
+              borderColor: "#FF699B",
+              borderWidth: 1,
+              borderRadius: 6,
+              paddingVertical: 6,
+            }}
+            selectedTextStyle={{
               fontSize: fontSize,
+              paddingLeft: 8,
+              color: "#FF699B",
+            }}
+            itemTextStyle={{
+              fontSize: fontSize,
+              color: "#FF699B",
             }}
             itemContainerStyle={{
-              backgroundColor: "#FCEBFE"
+              backgroundColor: "#FCEBFE",
             }}
             data={verseSelector}
             labelField="label"
             valueField="value"
-            value={selectedVerse}
-            onChange={item => setSelectedVerse(item)}
+            value={verseSelected}
+            onChange={item => setVerseSelected(item)}
           />
         </View>
 
@@ -380,9 +379,7 @@ export default function Home() {
         <BannerAd
           unitId={__DEV__ ? TestIds.ADAPTIVE_BANNER : adId}
           size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-          requestOptions={{
-            requestNonPersonalizedAdsOnly: true
-          }}
+          requestOptions={{ requestNonPersonalizedAdsOnly: true }}
         />
       </View>
     </>

@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Bíblia para elas",
+    "name": "Bíblia para Elas",
     "slug": "womans-bible",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -10,7 +10,7 @@
     "splash": {
       "image": "./assets/images/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#FF699B"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -18,7 +18,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "br.com.gracetech.womansbible",
-      "buildNumber": "1",
+      "buildNumber": "3",
       "infoPlist": {
         "NSUserTrackingUsageDescription": "This identifier will be used to deliver personalized ads to you."
       }
@@ -28,10 +28,11 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#FF699B"
       },
+      "package": "br.com.gracetech.womansbible",
+      "versionCode": "2",
       "permissions": [
         "com.google.android.gms.permission.AD_ID"
-      ],
-      "package": "br.com.gracetech.womansbible"
+      ]
     },
     "plugins": [
       "expo-router",
@@ -61,11 +62,11 @@
       "eas": {
         "projectId": "961a5445-d25b-4a1a-ad34-a572ed7cff95"
       }
-    },
-    "react-native-google-mobile-ads": {
-      "android_app_id": "ca-app-pub-3200984351467142~5561666791",
-      "ios_app_id": "ca-app-pub-3200984351467142~2392076969",
-      "user_tracking_usage_description": "This identifier will be used to deliver personalized ads to you."
     }
+  },
+  "react-native-google-mobile-ads": {
+    "android_app_id": "ca-app-pub-3200984351467142~5561666791",
+    "ios_app_id": "ca-app-pub-3200984351467142~2392076969",
+    "user_tracking_usage_description": "This identifier will be used to deliver personalized ads to you."
   }
 }

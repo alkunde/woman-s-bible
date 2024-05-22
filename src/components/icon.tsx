@@ -1,15 +1,19 @@
 import { ReactNode } from "react";
 import { TouchableOpacity, TouchableOpacityProps } from "react-native";
 
-type IconProps = TouchableOpacityProps & {
+type Props = TouchableOpacityProps & {
   children: ReactNode;
 }
 
-export function Icon({ children, ...rest }: IconProps) {
+export function Icon({ children, ...rest }: Props) {
   return (
     <TouchableOpacity
       activeOpacity={0.7}
-      style={{ width: 56, justifyContent: "center", alignItems: "center" }}
+      style={{
+        width: 56,
+        justifyContent: "center",
+        alignItems: "center",
+      }}
       {...rest}
     >
       {children}
