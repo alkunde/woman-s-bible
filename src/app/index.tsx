@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import { FlatList, Platform, StatusBar, TouchableOpacity, View } from "react-native";
+import { FlatList, StatusBar, TouchableOpacity, View } from "react-native";
 import { FontAwesome, MaterialIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Dropdown } from "react-native-element-dropdown";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { BannerAd, BannerAdSize, TestIds} from "react-native-google-mobile-ads";
 import axios from "axios";
 
+import { Advertise } from "@/components/advertise";
 import { Icon } from "@/components/icon";
 import { Loading } from "@/components/loading";
 import { Verse } from "@/components/verse";
@@ -21,12 +21,6 @@ type Selector = {
   label: string;
   value: string;
 }
-
-const adId = Platform.select({
-  android: "ca-app-pub-3200984351467142/4121512481",
-  ios: "ca-app-pub-3200984351467142/9321868275",
-  default: "",
-});
 
 const VERSION_STORAGE = "@womans-bible-gracetech:version";
 const BOOK_STORAGE = "@womans-bible-gracetech:book";
@@ -376,11 +370,7 @@ export default function Home() {
           </TouchableOpacity>
         </View>
 
-        <BannerAd
-          unitId={__DEV__ ? TestIds.ADAPTIVE_BANNER : adId}
-          size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-          requestOptions={{ requestNonPersonalizedAdsOnly: true }}
-        />
+        <Advertise />
       </View>
     </>
   );
