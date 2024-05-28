@@ -6,11 +6,12 @@ import { Dropdown } from "react-native-element-dropdown";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 
-import { Advertise } from "@/components/advertise";
-import { Icon } from "@/components/icon";
-import { Loading } from "@/components/loading";
-import { Verse } from "@/components/verse";
-import data from "@/utils/books.json";
+import { Advertise } from "../components/advertise";
+import { Icon } from "../components/icon";
+import { Loading } from "../components/loading";
+import { Verse } from "../components/verse";
+
+import data from "../utils/books.json";
 
 type Verses = {
   verseNumber: string;

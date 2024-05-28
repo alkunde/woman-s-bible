@@ -1,10 +1,8 @@
-import 'react-native-reanimated';
-import { useEffect, useState } from 'react';
-import { Platform } from 'react-native';
-import * as SplashScreen from 'expo-splash-screen';
-import { Slot } from 'expo-router';
+import { useEffect, useState } from "react";
+import { Platform } from "react-native";
+import { Slot } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
 import { AdEventType, AppOpenAd, TestIds } from "react-native-google-mobile-ads";
-import { requestTrackingPermissionsAsync } from 'expo-tracking-transparency';
 
 export default function RootLayout() {
   const [onComplete, setOnComplete] = useState(false);
@@ -34,8 +32,6 @@ export default function RootLayout() {
 
   useEffect(() => {
     async function prepare() {
-      await requestTrackingPermissionsAsync();
-
       if (onComplete) {
         await SplashScreen.hideAsync();
       }

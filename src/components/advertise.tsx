@@ -10,9 +10,9 @@ const adId = Platform.select({
 export function Advertise() {
   return (
     <BannerAd
-          unitId={__DEV__ ? TestIds.ADAPTIVE_BANNER : adId}
-          size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-          requestOptions={{ requestNonPersonalizedAdsOnly: true }}
-        />
+      unitId={__DEV__ ? TestIds.ADAPTIVE_BANNER : adId}
+      size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+      requestOptions={{ requestNonPersonalizedAdsOnly: true }}
+    />
   );
 }
