@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { Platform } from "react-native";
-import { Slot } from "expo-router";
-import * as SplashScreen from "expo-splash-screen";
-import { AdEventType, AppOpenAd, TestIds } from "react-native-google-mobile-ads";
+import { Slot, SplashScreen } from "expo-router";
+import { AdEventType, AdsConsent, AdsConsentStatus, AppOpenAd, TestIds } from "react-native-google-mobile-ads";
 
 export default function RootLayout() {
   const [onComplete, setOnComplete] = useState(false);
@@ -33,7 +32,7 @@ export default function RootLayout() {
   useEffect(() => {
     async function prepare() {
       if (onComplete) {
-        await SplashScreen.hideAsync();
+        SplashScreen.hideAsync();
       }
     }
 
@@ -42,13 +41,31 @@ export default function RootLayout() {
 
   useEffect(() => {
     async function prepare() {
-      await SplashScreen.preventAutoHideAsync();
+      SplashScreen.preventAutoHideAsync();
+
+      // const consentInfo = await AdsConsent.requestInfoUpdate();
+      // console.log(consentInfo);
+      // if (consentInfo.isConsentFormAvailable && consentInfo.status === AdsConsentStatus.REQUIRED) {
+      //   await AdsConsent.showForm();
+      // }
 
       appOpenAd.load();
     }
 
     prepare();
   }, []);
+
+  // useEffect(() => {
+  //   checkPermissions();
+  // }, []);
+
+  // const checkPermissions = async () => {
+  //   const consentInfo = await AdsConsent.requestInfoUpdate();
+  //   console.log(consentInfo);
+  //   if (consentInfo.isConsentFormAvailable && consentInfo.status === AdsConsentStatus.REQUIRED) {
+  //     await AdsConsent.showForm();
+  //   }
+  // }
 
   if (!onComplete) return null;
 
