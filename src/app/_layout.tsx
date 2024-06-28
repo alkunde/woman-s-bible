@@ -10,6 +10,7 @@ const ADS_SHOW_STORAGE = "@womans-bible-gracetech:ads-show";
 
 export default function RootLayout() {
   const [onComplete, setOnComplete] = useState(false);
+  const [personalized, setPersonalized] = useState(true);
 
   const appOpenId = Platform.select({
     android: "ca-app-pub-3200984351467142/2808430816",
@@ -19,7 +20,7 @@ export default function RootLayout() {
 
   const appOpenAd = AppOpenAd.createForAdRequest(
     __DEV__ ? TestIds.APP_OPEN : appOpenId,
-    { requestNonPersonalizedAdsOnly: true }
+    { requestNonPersonalizedAdsOnly: personalized }
   );
 
   appOpenAd.addAdEventListener(AdEventType.LOADED, () => {
@@ -49,6 +50,9 @@ export default function RootLayout() {
 
       const showAds = await AsyncStorage.getItem(ADS_SHOW_STORAGE);
       if (showAds) {
+        if (consentInfo.status === AdsConsentStatus.OBTAINED) {
+          setPersonalized(false);
+        }
         if (showAds === "true") {
           appOpenAd.load();
         }
