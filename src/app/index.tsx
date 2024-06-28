@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { FlatList, StatusBar, TouchableOpacity, View } from "react-native";
-import { FontAwesome, MaterialIcons } from "@expo/vector-icons";
+import { FlatList, StatusBar, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { FontAwesome, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Dropdown } from "react-native-element-dropdown";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -12,6 +12,7 @@ import { Loading } from "../components/loading";
 import { Verse } from "../components/verse";
 
 import data from "../utils/books.json";
+import theme from "../styles/theme";
 
 type Verses = {
   verseNumber: string;
@@ -35,7 +36,7 @@ export default function Home() {
     { label: "NVI", value: "nvi" },
     { label: "ACF", value: "acf" },
     { label: "RA", value: "ra" },
-  ]
+  ];
 
   const [loading, setLoading] = useState(false);
   const [verses, setVerses] = useState<Verses[]>([]);
@@ -45,6 +46,8 @@ export default function Home() {
   const [verseSelector, setVerseSelector] = useState<Selector[]>([]);
   const [verseSelected, setVerseSelected] = useState<Selector>();
   const [fontSize, setFontSize] = useState(14);
+  const [errorLoading, setErrorLoading] = useState(false);
+  const [changeVerse, setChangeVerse] = useState(false);
 
   async function increaseFontSize() {
     if (fontSize === 26) return;
@@ -105,10 +108,14 @@ export default function Home() {
             verseText: item.text,
           }
         });
+        setErrorLoading(false);
         setVerses(items);
+      } else {
+        setErrorLoading(true);
       }
     } catch(error) {
-      console.warn(error);
+      setErrorLoading(true);
+      console.log(error);
     } finally {
       setLoading(false);
     }
@@ -116,6 +123,12 @@ export default function Home() {
 
   async function restoreVersion() {
     const versionData = await AsyncStorage.getItem(VERSION_STORAGE);
+    const sizeData = await AsyncStorage.getItem(SIZE_STORAGE);
+
+    if (sizeData) {
+      setFontSize(parseInt(sizeData));
+    }
+
     if (versionData) {
       const filtered = versionSelector.filter(item => item.value === versionData);
       setVersionSelected(filtered[0]);
@@ -154,7 +167,7 @@ export default function Home() {
       const bookFiltered = data.data.filter(item => item.title === bookSelected.label);
       if (bookFiltered.length > 0) {
         const verseList: Selector[] = [];
-        for(let i = 1; i <= bookFiltered[0].chapters; i++) {
+        for (let i = 1; i <= bookFiltered[0].chapters; i++) {
           verseList.push({
             value: i.toString(),
             label: i.toString(),
@@ -162,9 +175,11 @@ export default function Home() {
         }
         setVerseSelector(verseList);
 
-        const verseData = await AsyncStorage.getItem(VERSE_STORAGE);
-        if (verseData) {
-          if (verseData === bookSelected.value) {
+        if (changeVerse) {
+          setVerseSelected(verseList[0]);
+        } else {
+          const verseData = await AsyncStorage.getItem(VERSE_STORAGE);
+          if (verseData) {
             const filtered = verseList.filter(item => item.value === verseData);
             if (filtered) {
               setVerseSelected(filtered[0]);
@@ -172,8 +187,7 @@ export default function Home() {
           } else {
             setVerseSelected(verseList[0]);
           }
-        } else {
-          setVerseSelected(verseList[0]);
+          setChangeVerse(false);
         }
       }
     }
@@ -201,178 +215,170 @@ export default function Home() {
   }, []);
 
   return (
-    <>
+    <View style={[ styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom } ]}>
       <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
 
-      <View style={{ flex: 1, paddingTop: insets.top, backgroundColor: "#FCEBFE" }}>
-        <View style={{ height: 56, flexDirection: "row", borderBottomWidth: 1, borderBottomColor: "#FF699B", alignItems: "center" }}>
-          <View style={{ flex: 4 }} />
+      <View style={styles.content}>
+        <View style={{ flex: 4 }} />
 
-          <Dropdown
-            style={{
-              flex: 1.5,
-              height: 40,
-              borderColor: "#FF699B",
-              borderWidth: 1,
-              borderRadius: 6,
-              marginRight: 8,
-            }}
-            selectedTextStyle={{
-              fontSize: fontSize,
-              paddingLeft: 8,
-              color: "#FF699B",
-            }}
-            itemTextStyle={{
-              fontSize: fontSize,
-              color: "#FF699B",
-            }}
-            itemContainerStyle={{
-              backgroundColor: "#FCEBFE",
-            }}
-            data={versionSelector}
-            labelField="label"
-            valueField="value"
-            value={versionSelected}
-            onChange={item => setVersionSelected(item)}
-          />
+        <Dropdown
+          style={[ styles.dropdownContainer, { flex: 1.5 } ]}
+          selectedTextStyle={[ styles.dropdownSelectedText, { fontSize: fontSize } ]}
+          itemTextStyle={{ fontSize: fontSize, color: theme.colors.primary }}
+          itemContainerStyle={styles.itemContainerStyle}
+          data={versionSelector}
+          labelField="label"
+          valueField="value"
+          value={versionSelected}
+          onChange={item => setVersionSelected(item)}
+        />
 
-          <View style={{ width: 1, height: "50%", backgroundColor: "#AAAAAA" }} />
+        <View style={styles.divider} />
 
-          <Icon onPress={increaseFontSize}>
-            <MaterialIcons name="text-increase" color="#FF699B" size={20} />
-          </Icon>
+        <Icon onPress={increaseFontSize}>
+          <MaterialCommunityIcons name="format-font-size-increase" color={theme.colors.primary} size={20} />
+        </Icon>
 
-          <View style={{ width: 1, height: "50%", backgroundColor: "#AAAAAA" }} />
+        <View style={styles.divider} />
 
-          <Icon onPress={decreaseFontSize}>
-            <MaterialIcons name="text-decrease" color="#FF699B" size={20} />
-          </Icon>
-        </View>
-
-        <View style={{ flexDirection: "row", gap: 16, paddingHorizontal: 16, marginVertical: 8 }}>
-          <Dropdown
-            style={{
-              flex: 4,
-              borderColor: "#FF699B",
-              borderWidth: 1,
-              borderRadius: 6,
-              paddingVertical: 6,
-            }}
-            selectedTextStyle={{
-              fontSize: fontSize,
-              paddingLeft: 8,
-              color: "#FF699B",
-            }}
-            itemTextStyle={{
-              fontSize: fontSize,
-              color: "#FF699B",
-            }}
-            itemContainerStyle={{
-              backgroundColor: "#FCEBFE",
-            }}
-            data={bookSelector}
-            labelField="label"
-            valueField="value"
-            value={bookSelected}
-            onChange={item => setBookSelected(item)}
-          />
-
-          <Dropdown
-            style={{
-              flex: 1,
-              borderColor: "#FF699B",
-              borderWidth: 1,
-              borderRadius: 6,
-              paddingVertical: 6,
-            }}
-            selectedTextStyle={{
-              fontSize: fontSize,
-              paddingLeft: 8,
-              color: "#FF699B",
-            }}
-            itemTextStyle={{
-              fontSize: fontSize,
-              color: "#FF699B",
-            }}
-            itemContainerStyle={{
-              backgroundColor: "#FCEBFE",
-            }}
-            data={verseSelector}
-            labelField="label"
-            valueField="value"
-            value={verseSelected}
-            onChange={item => setVerseSelected(item)}
-          />
-        </View>
-
-        <View style={{ flex: 1 }}>
-          {loading ? <Loading /> : (
-            <FlatList
-              data={verses}
-              keyExtractor={(item) => item.verseNumber}
-              renderItem={({ item }) => (
-                <Verse
-                  num={item.verseNumber}
-                  total={verses.length.toString()}
-                  texto={item.verseText}
-                  fontSize={fontSize}
-                />
-              )}
-              contentContainerStyle={{
-                paddingHorizontal: 16,
-                paddingBottom: 100,
-              }}
-              showsVerticalScrollIndicator={false}
-            />
-          )}
-
-          <TouchableOpacity
-            activeOpacity={0.7}
-            style={{
-              position: "absolute",
-              width: 48,
-              height: 48,
-              justifyContent: "center",
-              alignItems: "center",
-              backgroundColor: "#FF699B",
-              borderRadius: 24,
-              bottom: 16,
-              right: 16,
-            }}
-            onPress={handleNextVerse}
-          >
-            <FontAwesome
-              name="chevron-right"
-              color="white"
-              size={18}
-            />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            activeOpacity={0.7}
-            style={{
-              position: "absolute",
-              width: 48,
-              height: 48,
-              justifyContent: "center",
-              alignItems: "center",
-              backgroundColor: "#FF699B",
-              borderRadius: 24,
-              bottom: 16,
-              left: 16,
-            }}
-            onPress={handlePrevVerse}
-          >
-            <FontAwesome
-              name="chevron-left"
-              color="white"
-              size={18}
-            />
-          </TouchableOpacity>
-        </View>
-
-        <Advertise />
+        <Icon onPress={decreaseFontSize}>
+          <MaterialCommunityIcons name="format-font-size-decrease" color={theme.colors.primary} size={20} />
+        </Icon>
       </View>
-    </>
+
+      <View style={styles.dropdownContent}>
+        <Dropdown
+          style={[ styles.dropdownContainer, { flex: 4 } ]}
+          selectedTextStyle={[ styles.dropdownSelectedText, { fontSize: fontSize } ]}
+          itemTextStyle={{ fontSize: fontSize, color: theme.colors.primary }}
+          itemContainerStyle={styles.itemContainerStyle}
+          data={bookSelector}
+          labelField="label"
+          valueField="value"
+          value={bookSelected}
+          onChange={item => {
+            setChangeVerse(true);
+            setBookSelected(item);
+          }}
+        />
+
+        <Dropdown
+          style={[ styles.dropdownContainer, { flex: 1 } ]}
+          selectedTextStyle={[ styles.dropdownSelectedText, { fontSize: fontSize } ]}
+          itemTextStyle={{ fontSize: fontSize, color: theme.colors.primary }}
+          itemContainerStyle={styles.itemContainerStyle}
+          data={verseSelector}
+          labelField="label"
+          valueField="value"
+          value={verseSelected}
+          onChange={item => setVerseSelected(item)}
+        />
+      </View>
+
+      <View style={{ flex: 1, paddingBottom: 10 }}>
+        {loading && !errorLoading && <Loading />}
+        {!loading && !errorLoading && (
+          <FlatList
+            data={verses}
+            keyExtractor={(item) => item.verseNumber}
+            renderItem={({ item }) => (
+              <Verse
+                num={item.verseNumber}
+                total={verses.length.toString()}
+                texto={item.verseText}
+                fontSize={fontSize}
+              />
+            )}
+            contentContainerStyle={{
+              paddingHorizontal: 16,
+              paddingBottom: 100,
+            }}
+            showsVerticalScrollIndicator={false}
+          />
+        )}
+        {!loading && errorLoading && (
+          <View style={{ flex: 1, justifyContent: "center", alignItems: "center"}}>
+            <Text style={{ textAlign: "center", paddingHorizontal: 16 }}>
+              Ocorreu algo inesperado. {`/n`}Verifique sua conexão com a internet.
+            </Text>
+          </View>
+        )}
+
+        <TouchableOpacity
+          activeOpacity={0.7}
+          style={[ styles.button, { right: 16 }]}
+          onPress={handleNextVerse}
+        >
+          <FontAwesome
+            name="chevron-right"
+            color={theme.colors.white}
+            size={18}
+          />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          activeOpacity={0.7}
+          style={[ styles.button, { left: 16 }]}
+          onPress={handlePrevVerse}
+        >
+          <FontAwesome
+            name="chevron-left"
+            color={theme.colors.white}
+            size={18}
+          />
+        </TouchableOpacity>
+      </View>
+
+      <Advertise />
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: theme.colors.light_background,
+  },
+  content: {
+    height: 56,
+    flexDirection: "row",
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.primary,
+    alignItems: "center",
+  },
+  dropdownContainer: {
+    height: 40,
+    borderColor: theme.colors.primary,
+    borderWidth: 1,
+    borderRadius: 6,
+    marginRight: 8,
+  },
+  dropdownContent: {
+    flexDirection: "row",
+    gap: 16,
+    paddingHorizontal: 16,
+    marginVertical: 8,
+  },
+  dropdownSelectedText: {
+    paddingLeft: 8,
+    color: theme.colors.primary,
+  },
+  itemContainerStyle: {
+    backgroundColor: theme.colors.light_background,
+  },
+  divider: {
+    width: 1,
+    height: "50%",
+    backgroundColor: theme.colors.light_divider,
+  },
+  button: {
+    position: "absolute",
+    width: 48,
+    height: 48,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: theme.colors.primary,
+    borderRadius: 24,
+    bottom: 26,
+  },
+});
