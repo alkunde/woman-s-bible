@@ -2,7 +2,13 @@ import { useEffect, useState } from "react";
 import { Platform } from "react-native";
 import { Slot, SplashScreen } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { AdEventType, AdsConsent, AdsConsentStatus, AppOpenAd, TestIds } from "react-native-google-mobile-ads";
+import {
+  AdEventType,
+  AdsConsent,
+  AdsConsentStatus,
+  AppOpenAd,
+  TestIds,
+} from "react-native-google-mobile-ads";
 
 SplashScreen.preventAutoHideAsync();
 
