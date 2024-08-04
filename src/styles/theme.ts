@@ -1,8 +1,9 @@
 export default {
   colors: {
-    primary: "#FF699B",
-    light_background: "#FCEBFE",
-    light_divider: "#AAAAAA",
+    primary_light: "#FF699B",
+    primary_dark: "#00796B",
+    background_light: "#FCEBFE",
+    divider_lihght: "#AAAAAA",
     white: "#FFFFFF",
   },
 }

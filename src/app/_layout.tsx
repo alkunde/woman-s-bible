@@ -1,14 +1,29 @@
+import "react-native-reanimated";
 import { useEffect, useState } from "react";
 import { Platform } from "react-native";
-import { Slot, SplashScreen } from "expo-router";
+import { Slot } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
+import {
+  AdEventType,
+  AdsConsent,
+  AdsConsentStatus,
+  AppOpenAd,
+  TestIds,
+} from "react-native-google-mobile-ads";
+import crashlytics from "@react-native-firebase/crashlytics";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { AdEventType, AdsConsent, AdsConsentStatus, AppOpenAd, TestIds } from "react-native-google-mobile-ads";
-
-SplashScreen.preventAutoHideAsync();
 
 const ADS_SHOW_STORAGE = "@womans-bible-gracetech:ads-show";
 
+// Prevent the splash screen from auto-hiding before asset loading is complete.
+SplashScreen.preventAutoHideAsync();
+
 export default function RootLayout() {
+  // const [loaded] = useFonts({
+  //   ...FontAwesome.font,
+  //   ...MaterialIcons.font,
+  // });
+
   const [onComplete, setOnComplete] = useState(false);
   const [personalized, setPersonalized] = useState(true);
 
@@ -43,22 +58,27 @@ export default function RootLayout() {
 
   useEffect(() => {
     async function prepare() {
-      const consentInfo = await AdsConsent.requestInfoUpdate();
-      if (consentInfo.isConsentFormAvailable && consentInfo.status === AdsConsentStatus.REQUIRED) {
-        await AdsConsent.showForm();
-      }
-
-      const showAds = await AsyncStorage.getItem(ADS_SHOW_STORAGE);
-      if (showAds) {
-        if (consentInfo.status === AdsConsentStatus.OBTAINED) {
-          setPersonalized(false);
+      try {
+        const consentInfo = await AdsConsent.requestInfoUpdate();
+        if (consentInfo.isConsentFormAvailable && consentInfo.status === AdsConsentStatus.REQUIRED) {
+          await AdsConsent.showForm();
         }
-        if (showAds === "true") {
-          appOpenAd.load();
+  
+        const showAds = await AsyncStorage.getItem(ADS_SHOW_STORAGE);
+        if (showAds) {
+          if (consentInfo.status === AdsConsentStatus.OBTAINED) {
+            setPersonalized(false);
+          }
+          if (showAds === "true") {
+            appOpenAd.load();
+          }
+        } else {
+          setOnComplete(true);
+          await AsyncStorage.setItem(ADS_SHOW_STORAGE, "true");
         }
-      } else {
+      } catch (error) {
+        crashlytics().recordError(error as any);
         setOnComplete(true);
-        await AsyncStorage.setItem(ADS_SHOW_STORAGE, "true");
       }
     }
 

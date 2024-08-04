@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Bíblia para Elas",
+    "name": "Biblia para Elas",
     "slug": "womans-bible",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -18,7 +18,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "br.com.gracetech.womansbible",
-      "buildNumber": "16"
+      "buildNumber": "17"
     },
     "android": {
       "adaptiveIcon": {
@@ -36,7 +36,17 @@
             "useFrameworks": "static"
           }
         }
-      ]
+      ],
+      [
+        "react-native-google-mobile-ads",
+        {
+          "androidAppId": "ca-app-pub-3200984351467142~5561666791",
+          "iosAppId": "ca-app-pub-3200984351467142~2392076969",
+          "delay_app_measurement_init": true,
+          "user_tracking_usage_description": "This identifier will be used to deliver personalized ads to you."
+        }
+      ],
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true
@@ -49,11 +59,5 @@
         "projectId": "53ac90d9-7423-403e-8caf-5085df66a88a"
       }
     }
-  },
-  "react-native-google-mobile-ads": {
-    "android_app_id": "ca-app-pub-3200984351467142~5561666791",
-    "ios_app_id": "ca-app-pub-3200984351467142~2392076969",
-    "delay_app_measurement_init": true,
-    "user_tracking_usage_description": "This identifier will be used to deliver personalized ads to you."
   }
 }

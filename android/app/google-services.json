@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "471196870766",
+    "project_id": "womans-bible-gracetech",
+    "storage_bucket": "womans-bible-gracetech.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:471196870766:android:b01e0e2d961a32d4a3de7f",
+        "android_client_info": {
+          "package_name": "br.com.gracetech.womansbible"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyADWaaSbdp1Du29-82Cxj5SlI5StMmtPEs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      },
+      "admob_app_id": "ca-app-pub-3200984351467142~5561666791"
+    }
+  ],
+  "configuration_version": "1"
+}
